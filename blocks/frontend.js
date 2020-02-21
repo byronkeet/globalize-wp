@@ -49,24 +49,33 @@ function numberOfStrings() {
 
 		let strings    = JSON.parse(data);
 		let numStrings = countObjectKeys( strings );
-		let numWords   = ( numStrings * 5 );
+		let numWords   = 0;
+
+		for (let key in strings) {
+
+			numWords += countWords(key);
+
+		}
 
 		request({url: readmeUrl})
-			.then(data1 => {
+			.then(data => {
 
-			let readmeStrings    = JSON.parse(data1);
+			let readmeStrings    = JSON.parse(data);
 			let readmeNumStrings = countObjectKeys( readmeStrings );
-			let readmeNumWords   = ( readmeNumStrings * 5 );
-			let totalWords       = ( numWords + readmeNumWords );
-			let totalCost        = ( ( Math.ceil( totalWords / 500 ) * 10 * 20 ) * 2 );
+			let readmeNumWords   = 0;
+
+			for (let key in readmeStrings) {
+
+				readmeNumWords += countWords(key);
+
+			}
+
+			let totalWords = ( numWords + readmeNumWords );
+			let totalCost  = ( ( Math.ceil( totalWords / 500 ) * 10 * 20 ) * 2 );
 
 			let responseDiv  = document.querySelector( '.wp-block-globalizewp-globalize-search__response' );
 			let responseText = __(
-				`Your plugin development trunk has ${numStrings} strings. Based on an average of 5 words per string, the estimated number of words is ${numWords}.
-				<br>
-				Your plugin readme trunk has ${readmeNumStrings} strinsg. Based on an average of 5 words per string, the estimated number of words is ${readmeNumWords}.
-				<br>
-				Based on a total of ${totalWords} words, the setup cost will be $${totalCost}.`
+				`Your plugin development trunk has ${numStrings} strings which contain a total of ${numWords} words. The readme trunk has ${readmeNumStrings} strings which contain a total of ${readmeNumWords} words. Based on a combined total of ${totalWords} words, the setup cost will be $${totalCost}.`
 			, 'globalizewp' );
 
 			responseDiv.innerHTML = responseText;
@@ -84,5 +93,15 @@ function numberOfStrings() {
 function countObjectKeys( obj ) {
 
 	return Object.keys( obj ).length;
+
+}
+
+function countWords(str) {
+
+	str = str.replace(/(^\s*)|(\s*$)/gi,"");
+	str = str.replace(/[ ]{2,}/gi," ");
+	str = str.replace(/\n /,"\n");
+
+	return str.split(' ').length;
 
 }
