@@ -1,0 +1,24 @@
+.entry-content .wp-block-globalizewp-globalize-search,
+.wp-block-globalizewp-globalize-search {
+	display: flex;
+	flex-wrap: wrap;
+
+	:first-child {
+		width: 100%;
+		font-weight: bold;
+	}
+
+	.wp-block-globalizewp-globalize-search__label {
+		width: 100%;
+	}
+
+	.wp-block-globalizewp-globalize-search__input {
+		flex-grow: 1;
+		max-width: 360px;
+		margin-bottom: 0;
+	}
+
+	.wp-block-globalizewp-globalize-search__button {
+		margin-left: 10px;
+	}
+}
