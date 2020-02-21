@@ -10,6 +10,27 @@ document.addEventListener( 'DOMContentLoaded', function() {
 
 } );
 
+let request = obj => {
+	return new Promise((resolve, reject) => {
+		let xhr = new XMLHttpRequest();
+		xhr.open(obj.method || "GET", obj.url);
+		if (obj.headers) {
+			Object.keys(obj.headers).forEach(key => {
+				xhr.setRequestHeader(key, obj.headers[key]);
+			});
+		}
+		xhr.onload = () => {
+			if (xhr.status >= 200 && xhr.status < 300) {
+				resolve(xhr.response);
+			} else {
+				reject(xhr.statusText);
+			}
+		};
+		xhr.onerror = () => reject(xhr.statusText);
+		xhr.send(obj.body);
+	});
+};
+
 function numberOfStrings() {
 
 	let slug = document.querySelector( '.wp-block-globalizewp-globalize-search__input' );
@@ -19,27 +40,45 @@ function numberOfStrings() {
 		return
 	}
 
-	let url  = `https://cors-anywhere.herokuapp.com/https://translate.wordpress.org/projects/wp-plugins/${slug.value}/dev/en-au/default/export-translations/?format=json`;
+	const developmentUrl  = `https://cors-anywhere.herokuapp.com/https://translate.wordpress.org/projects/wp-plugins/${slug.value}/dev/en-au/default/export-translations/?format=json`;
 
-	let xmlhttp = new XMLHttpRequest();
+	let readmeUrl = `https://cors-anywhere.herokuapp.com/https://translate.wordpress.org/projects/wp-plugins/${slug.value}/dev-readme/en-au/default/export-translations/?format=json`;
 
-	xmlhttp.onreadystatechange = function() {
+	request({url: developmentUrl})
+	.then(data => {
 
-	if ( 4 == this.readyState  && 200 == this.status ) {
+		let strings    = JSON.parse(data);
+		let numStrings = countObjectKeys( strings );
+		let numWords   = ( numStrings * 5 );
 
-		let strings      = JSON.parse( this.responseText );
-		let numStrings   = countObjectKeys( strings );
-		let numWords     = ( numStrings * 5 );
-		let responseDiv  = document.querySelector( '.wp-block-globalizewp-globalize-search__response' );
-		let responseText = __( `Your plugin development trunk has ${numStrings} string. Based on an avarage of 5 words per strings, the estimated number of words is ${numWords}.`, 'globalizewp' );
+		request({url: readmeUrl})
+			.then(data1 => {
 
-		return responseDiv.innerHTML = responseText;
+			let readmeStrings    = JSON.parse(data1);
+			let readmeNumStrings = countObjectKeys( readmeStrings );
+			let readmeNumWords   = ( readmeNumStrings * 5 );
+			let totalWords       = ( numWords + readmeNumWords );
+			let totalCost        = ( ( Math.ceil( totalWords / 500 ) * 10 * 20 ) * 2 );
 
-		}
-	};
+			let responseDiv  = document.querySelector( '.wp-block-globalizewp-globalize-search__response' );
+			let responseText = __(
+				`Your plugin development trunk has ${numStrings} strings. Based on an average of 5 words per string, the estimated number of words is ${numWords}.
+				<br>
+				Your plugin readme trunk has ${readmeNumStrings} strinsg. Based on an average of 5 words per string, the estimated number of words is ${readmeNumWords}.
+				<br>
+				Based on a total of ${totalWords} words, the setup cost will be $${totalCost}.`
+			, 'globalizewp' );
 
-	xmlhttp.open( 'GET', url, true );
-	xmlhttp.send();
+			responseDiv.innerHTML = responseText;
+
+			})
+			.catch(error => {
+				console.log(error);
+			});
+})
+.catch(error => {
+	console.log(error);
+});
 }
 
 function countObjectKeys( obj ) {
