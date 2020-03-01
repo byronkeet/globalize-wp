@@ -71,7 +71,15 @@ function numberOfStrings() {
 
 			let responseDiv  = document.querySelector( '.wp-block-globalizewp-globalize-search__response' );
 			let responseText = __(
-				`Your plugin development trunk has ${numStrings} strings which contain a total of ${numWords} words. The readme details page contains a total of ${readmeNumWords} words. Based on a combined total of ${totalWords} words, the setup cost will be $${totalCost}.`
+				`Your plugin development trunk has ${numStrings} strings which contain a total of ${numWords} words. The readme details page contains a total of ${readmeNumWords} words.
+				<br><br>
+				Based on a combined total of ${totalWords} words:
+				<br><br>
+				Setup Cost: $${totalCost}
+				<br><br>
+				Setup with 1 Year string update subscription: $${totalCost + 300}
+				<br><br>
+				Only 1 Year Subscription: $500`
 			, 'globalizewp' );
 
 			responseDiv.innerHTML = responseText;
